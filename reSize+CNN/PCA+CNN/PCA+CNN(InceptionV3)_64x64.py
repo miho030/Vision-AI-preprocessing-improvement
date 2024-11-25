@@ -27,9 +27,9 @@ img_height, img_width = 224, 224
 
 training_set = datagen.flow_from_directory(
     train_path,
-    target_size=(img_height, img_width),  # ���� �̹��� ũ��
-    batch_size=32,           # ��ġ ũ�� 32�� ����
-    shuffle=False,           # ���� ���� (PCA�� �߿�)
+    target_size=(img_height, img_width),
+    batch_size=32,
+    shuffle=False,
     class_mode='binary'
 )
 
@@ -124,16 +124,16 @@ f1 = f1_score(test_labels, predicted_classes)
 
 
 # 결과 출력
-print("\n\n", "=" * 40)
-print("\t --- Model result ---")
-print("\t * PCA + CNN / InceptionV3 / Size(64x64)")
-print("="*40)
-print(f"Accuracy: {accuracy:.4f}")
-print(f"Precision: {precision:.4f}")
-print(f"Recall: {recall:.4f}")
-print(f"F1 Score: {f1:.4f}")
-print("="*40)
-print(f"PCA execute time : {pca_total_time:.6f} seconds.")
-print(f"CNN model execute time : {cnn_total_time:.6f} seconds.")
-print(f"Total execute time : {total_time:.6f} seconds.")
-print("="*40)
+print("\n\n" + "=" * 60)
+print("--- Model result ---")
+print("* PCA + CNN / InceptionV3 / Size(64x64)")
+print("="*60)
+print(f"- Accuracy: {accuracy:.4f}")
+print(f"- Precision: {precision:.4f}")
+print(f"- Recall: {recall:.4f}")
+print(f"- F1 Score: {f1:.4f}")
+print("="*60)
+print(f"* PCA execute time : {pca_total_time:.3f} seconds.")
+print(f"* CNN model execute time : {cnn_total_time:.3f} seconds.")
+print(f"* Total execute time : {total_time:.3f} seconds.")
+print("="*60)
