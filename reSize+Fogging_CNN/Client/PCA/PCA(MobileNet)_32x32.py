@@ -1,13 +1,19 @@
 # PCA w.MobileNet
 
-import os
+import os, time
 import numpy as np
 from sklearn.decomposition import PCA
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications import MobileNetV2
 
-train_path = "training_set"
-test_path = "test_set"
+train_path = os.path.abspath("../../../_Dataset/cat_dog/training_set")
+test_path = os.path.abspath("../../../_Dataset/cat_dog/test_set")
+npyResDir = "./pca_npyRes/"
+
+os.makedirs(npyResDir, exist_ok=True)
+
+""" Fogging+PCA 전처리 시간 측정 시작 """
+fog_pca_start_time = time.time()
 
 # ImageDataGenerator 생성
 datagen = ImageDataGenerator(rescale=1.0 / 255.0)
@@ -55,9 +61,19 @@ train_features_pca = pca.fit_transform(train_features_flat)
 test_features_pca = pca.transform(test_features_flat)
 
 # 차원 축소된 데이터 저장
-np.save("train_features_pca.npy", train_features_pca)
-np.save("test_features_pca.npy", test_features_pca)
-np.save("train_labels.npy", training_set.classes)
-np.save("test_labels.npy", test_set.classes)
+np.save(npyResDir + "train_features_pca.npy", train_features_pca)
+np.save(npyResDir + "test_features_pca.npy", test_features_pca)
+np.save(npyResDir + "train_labels.npy", training_set.classes)
+np.save(npyResDir + "test_labels.npy", test_set.classes)
 
 print("PCA data saved.")
+
+""" Fogging+PCA 시간 측정 종료 """
+fog_pca_end_time = time.time()
+
+# 시간 산정
+fog_pca_total_time = fog_pca_end_time - fog_pca_start_time
+print("\n\n" + "=" * 60)
+print("--- Fogging + PCA TimeSet ---")
+print(f"Total execute time : {fog_pca_total_time:.3f} seconds.")
+print("="*60)
