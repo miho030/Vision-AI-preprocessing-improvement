@@ -1,4 +1,0 @@
-Process
-1. save
-2. load
-3. CNN
