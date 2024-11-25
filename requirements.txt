@@ -1,7 +1,9 @@
+numpy
+matplotlib
 scikit-learn
 tensorflow
-matplotlib
-numpy
 keras
 pillow
 kaggle
+scp
+paramiko
