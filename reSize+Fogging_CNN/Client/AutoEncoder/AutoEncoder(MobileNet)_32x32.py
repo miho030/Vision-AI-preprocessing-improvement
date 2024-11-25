@@ -1,6 +1,6 @@
 # AutoEncoder (MobileNetV2)
 
-import os
+import os, time
 import numpy as np
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications import MobileNetV2
@@ -9,8 +9,14 @@ from tensorflow.keras.layers import Dense, Flatten, Reshape, Input
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
 
-train_path = "training_set"
-test_path = "test_set"
+train_path = os.path.abspath("../../../_Dataset/cat_dog/training_set")
+test_path = os.path.abspath("../../../_Dataset/cat_dog/test_set")
+npyResDir = "./auto_npyRes/"
+
+os.makedirs(npyResDir, exist_ok=False)
+
+""" 시간 측정 시작 """
+auto_start_time = time.time()
 
 # ImageDataGenerator 생성
 datagen = ImageDataGenerator(rescale=1.0 / 255.0)
@@ -83,9 +89,19 @@ train_features_reduced = encoder.predict(train_features)
 test_features_reduced = encoder.predict(test_features)
 
 # 차원 축소된 데이터 저장
-np.save("train_features_reduced.npy", train_features_reduced)
-np.save("test_features_reduced.npy", test_features_reduced)
-np.save("train_labels.npy", training_set.classes)
-np.save("test_labels.npy", test_set.classes)
+np.save(npyResDir + "train_features_reduced.npy", train_features_reduced)
+np.save(npyResDir + "test_features_reduced.npy", test_features_reduced)
+np.save(npyResDir + "train_labels.npy", training_set.classes)
+np.save(npyResDir + "test_labels.npy", test_set.classes)
 
 print("Autoencoder data saved.")
+
+""" 시간 측정 종료 """
+auto_end_time = time.time()
+auto_total_time = auto_end_time - auto_start_time
+
+print("\n\n", "=" * 40)
+print("--- AutoEncoder TimeSet ---")
+print(f"* Total execute time : {auto_total_time:.3f} seconds.")
+print("="*40)
+

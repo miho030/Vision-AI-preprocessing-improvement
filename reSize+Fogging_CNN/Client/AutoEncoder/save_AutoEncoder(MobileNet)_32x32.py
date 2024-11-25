@@ -1,6 +1,6 @@
 # AutoEncoder training and save
 
-import os
+import os, time
 import numpy as np
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Dense, Flatten, Reshape, Input
@@ -10,8 +10,14 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications import MobileNetV2
 
 # 데이터 경로
-train_path = "training_set"
-test_path = "test_set"
+train_path = os.path.abspath("../../../_Dataset/cat_dog/training_set")
+test_path = os.path.abspath("../../../_Dataset/cat_dog/test_set")
+npyResDir = "./auto_npyRes/"
+
+os.makedirs(npyResDir, exist_ok=True)
+
+""" 시간 측정 시작 """
+auto_start_time = time.time()
 
 # ImageDataGenerator 생성
 datagen = ImageDataGenerator(rescale=1.0 / 255.0)
@@ -76,5 +82,16 @@ autoencoder.fit(
 )
 
 # 모델 저장
-encoder.save("encoder_32x32_model.h5")
+h5_file_path = npyResDir + "encoder_32x32_model.h5"
+encoder.save(h5_file_path)
 print("Encoder model saved.")
+
+""" 시간 측정 종료 """
+auto_end_time = time.time()
+auto_total_time = auto_end_time - auto_start_time
+
+# 시간 산정
+print("\n\n" + "=" * 60)
+print("--- Fogging + AutoEncoder (save) TimeSet ---")
+print(f" * Total execute time : {auto_total_time:.3f} seconds.")
+print("="*60)
