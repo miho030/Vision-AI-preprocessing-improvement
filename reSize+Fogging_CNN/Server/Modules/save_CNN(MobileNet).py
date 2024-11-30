@@ -4,7 +4,7 @@
 
 import numpy as np
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Input
+from tensorflow.keras.layers import Dense, Input, Dropout
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.utils import to_categorical
@@ -23,8 +23,10 @@ test_labels_cat = to_categorical(test_labels)
 model = Sequential([
     Input(shape=(train_features_reduced.shape[1],)),  # 차원 축소된 입력
     Dense(128, activation='relu'),  # 은닉층
+    Dropout(0.5),
     Dense(64, activation='relu'),  # 추가 은닉층
-    Dense(2, activation='softmax')  # 출력층 (다중 클래스 분류)
+    Dropout(0.5),
+    Dense(train_labels_cat.shape[1], activation='softmax')  # 출력층 (다중 클래스 분류)
 ])
 
 # 모델 컴파일
