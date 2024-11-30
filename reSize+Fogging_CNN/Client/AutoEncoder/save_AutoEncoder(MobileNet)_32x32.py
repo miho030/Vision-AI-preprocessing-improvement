@@ -1,6 +1,6 @@
 # AutoEncoder training and save
 
-import os, time
+import os, sys, time
 import numpy as np
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Dense, Flatten, Reshape, Input
@@ -10,11 +10,55 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications import MobileNetV2
 
 # 데이터 경로
-train_path = os.path.abspath("../../../_Dataset/cat_dog/training_set")
-test_path = os.path.abspath("../../../_Dataset/cat_dog/test_set")
-npyResDir = "./auto_npyRes/"
+cwd = os.path.dirname(os.path.abspath(__file__))
 
+# 차원축소 데이터 저장 경로 지정
+npyResDir = "./auto_npyRes/auto_cnn_M_32/"
 os.makedirs(npyResDir, exist_ok=True)
+
+# 재귀함수 활용하여 결정된 데이터셋의 절대경로 및 용량을 구해 출력함.
+def get_dataset_paths():
+    def get_folder_size(path):
+        total_size = 0
+        for dirpath, dirnames, filenames in os.walk(path):
+            for file in filenames:
+                filepath = os.path.join(dirpath, file)
+                total_size += os.path.getsize(filepath) # 파일 크기를 누적
+        return total_size
+
+    if len(sys.argv) != 2:
+        print("\n" + "Usage: python script_name.py <choice> (1, 2, or 3)")
+        return None, None, None
+
+    choice = sys.argv[1]
+
+    if choice == "1":
+        train_path = os.path.abspath(os.path.join(cwd, "../../_Dataset/cat_dog/training_set"))
+        test_path = os.path.abspath(os.path.join(cwd, "../../_Dataset/cat_dog/test_set"))
+    elif choice == "2":
+        train_path = os.path.abspath(os.path.join(cwd, "../../_Dataset/swimcat/training_set"))
+        test_path = os.path.abspath(os.path.join(cwd, "../../_Dataset/swimcat/test_set"))
+    elif choice == "3":
+        train_path = os.path.abspath(os.path.join(cwd, "../../_Dataset/FER_2013/training_set"))
+        test_path = os.path.abspath(os.path.join(cwd, "../../_Dataset/FER_2013/test_set"))
+    else:
+        print("Invalid choice. Please select 1, 2, or 3.")
+        return None, None, None
+
+    print("\n\n" + "=" * 60)
+    print("--- DataSet Selection ---")
+    print(f"Training Path: {train_path}")
+    print(f"Testing Path: {test_path}")
+    training_folder_size = get_folder_size(train_path) # 폴더 용량 계산
+    print(f"Training folder size: {training_folder_size / (1024**2):.2f} MB\n" + "="*60 + "\n")
+
+    return train_path, test_path, choice
+
+# 함수 호출 및 결과 출력
+train_path, test_path, choice = get_dataset_paths()
+if train_path == None:
+    exit(1)
+
 
 """ 시간 측정 시작 """
 auto_start_time = time.time()
@@ -81,14 +125,42 @@ autoencoder.fit(
     verbose=1
 )
 
-# 모델 저장
-h5_file_path = npyResDir + "encoder_32x32_model.h5"
-encoder.save(h5_file_path)
-print("Encoder model saved.")
+# AutoEncoder 및 분류 모델 저장
+ae_path, model_path = None, None
+if choice == "1":
+    ae_path = os.path.join(npyResDir, "fog_autoencoder_mobilenet_32x32_dogcat.h5")
+elif choice == "3":
+    ae_path = os.path.join(npyResDir, "fog_autoencoder_mobilenet_32x32_FEB2013.h5")
+
+if ae_path == None or model_path == None:
+    print("autoEncoder and model path is nor correct!!")
+    exit(1)
+else:
+    encoder.save(ae_path)
+    print("AutoEncoder saved.")
 
 """ 시간 측정 종료 """
 auto_end_time = time.time()
 auto_total_time = auto_end_time - auto_start_time
+
+
+def size_npy_files(directory):
+    print("=" * 60)
+    total_size = 0
+    # 디렉토리의 모든 파일 확인
+    for file_name in os.listdir(directory):
+        file_path = os.path.join(directory, file_name)
+        if os.path.isfile(file_path):  # 파일인지 확인
+            file_size = os.path.getsize(file_path)  # 파일 크기 (바이트)
+            print(f" - {file_name}: {file_size / (1024 ** 2):.2f} MB")  # MB 단위로 출력
+            total_size += file_size
+
+    # 총 용량 출력
+    print(f"\nTotal size of all files: {total_size / (1024 ** 2):.2f} MB\n" + "="*60)
+
+
+# npyResDir 내 파일 용량 측정 함수 호출
+size_npy_files(npyResDir)
 
 # 시간 산정
 print("\n\n" + "=" * 60)

@@ -1,6 +1,6 @@
 # AutoEncoder (MobileNetV2)
 
-import os, time
+import os, sys, time
 import numpy as np
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications import MobileNetV2
@@ -9,11 +9,44 @@ from tensorflow.keras.layers import Dense, Flatten, Reshape, Input
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
 
-train_path = os.path.abspath("../../../_Dataset/cat_dog/training_set")
-test_path = os.path.abspath("../../../_Dataset/cat_dog/test_set")
-npyResDir = "./auto_npyRes/"
+# 현재 프로젝트의 경로 활용
+cwd = os.path.dirname(os.path.abspath(__file__))
 
-os.makedirs(npyResDir, exist_ok=False)
+def get_dataset_paths():
+    if len(sys.argv) != 2:
+        print("\n" + "Usage: python script_name.py <choice> (1, 2, or 3)")
+        return None, None, None
+
+    choice = sys.argv[1]
+
+    if choice == "1":
+        train_path = os.path.abspath(os.path.join(cwd, "../../../_Dataset/cat_dog/training_set"))
+        test_path = os.path.abspath(os.path.join(cwd, "../../../_Dataset/cat_dog/test_set"))
+    elif choice == "2":
+        train_path = os.path.abspath(os.path.join(cwd, "../../../_Dataset/swimcat/training_set"))
+        test_path = os.path.abspath(os.path.join(cwd, "../../../_Dataset/swimcat/test_set"))
+    elif choice == "3":
+        train_path = os.path.abspath(os.path.join(cwd, "../../../_Dataset/FER_2013/training_set"))
+        test_path = os.path.abspath(os.path.join(cwd, "../../../_Dataset/FER_2013/test_set"))
+    else:
+        print("Invalid choice. Please select 1, 2, or 3.")
+        return None, None, None
+
+    print("="*60)
+    print("--- DataSet selection ---")
+    print(f"Training Path: {train_path}")
+    print(f"Testing Path: {test_path}")
+    print("="*60)
+
+    return train_path, test_path, choice
+
+# 함수 호출 및 결과 출력
+train_path, test_path, choice = get_dataset_paths()
+if train_path == None:
+    exit(1)
+
+npyResDir = "./auto_npyRes/"
+os.makedirs(npyResDir, exist_ok=True)
 
 """ 시간 측정 시작 """
 auto_start_time = time.time()
