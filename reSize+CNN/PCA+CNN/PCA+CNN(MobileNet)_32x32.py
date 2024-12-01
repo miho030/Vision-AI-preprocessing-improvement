@@ -166,9 +166,9 @@ predicted_classes = np.argmax(predictions, axis=1)
 
 # 정확도, 정밀도, 재현율, F1 점수 계산
 accuracy = accuracy_score(test_labels, predicted_classes)
-precision = precision_score(test_labels, predicted_classes)
-recall = recall_score(test_labels, predicted_classes)
-f1 = f1_score(test_labels, predicted_classes)
+precision = precision_score(test_labels, predicted_classes, average='micro')
+recall = recall_score(test_labels, predicted_classes, average='micro')
+f1 = f1_score(test_labels, predicted_classes, average='micro')
 
 
 # 학습된 가중치 모델 저장
