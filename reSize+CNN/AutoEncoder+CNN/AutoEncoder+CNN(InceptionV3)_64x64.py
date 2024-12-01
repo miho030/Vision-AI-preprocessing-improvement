@@ -227,7 +227,7 @@ predicted_classes = np.argmax(predictions, axis=1)
 
 # 정확도, 정밀도, 재현율, F1 점수 계산
 accuracy = accuracy_score(test_labels, predicted_classes)
-precision = precision_score(test_labels, predicted_classes, average='weighted')
+precision = precision_score(test_labels, predicted_classes,  average='weighted')
 recall = recall_score(test_labels, predicted_classes, average='weighted')
 f1 = f1_score(test_labels, predicted_classes, average='weighted')
 
