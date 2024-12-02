@@ -1,7 +1,7 @@
 import os
 import subprocess
-#from fog1.calculate_folder_sizes import calculate_folder_and_subfolder_sizes
 
+#from.calculate_folder_sizes import calculate_folder_and_subfolder_sizes
 
 def execute_scripts(script_paths, input_values, log_dir="logs"):
     """
@@ -23,7 +23,7 @@ def execute_scripts(script_paths, input_values, log_dir="logs"):
                 with open(log_filepath, "w") as log_file:
                     # subprocess로 스크립트 실행 (입력값을 명령줄 인수로 전달)
                     process = subprocess.run(
-                        ["python", script, str(input_value)],  # 'python script_path input_value'
+                        ["python3", script, str(input_value)],  # 'python script_path input_value'
                         text=True,
                         stdout=log_file,  # 표준 출력을 로그 파일로 저장
                         stderr=log_file,  # 표준 에러도 로그 파일로 저장
@@ -52,6 +52,15 @@ for root, dirs, files in os.walk(pca_folder):
         if file.endswith(".py"):
             script_paths.append(os.path.join(root, file))
 
+# save_로 시작하는 파일을 우선적으로 실행하도록 정렬
+script_paths.sort(key=lambda x: (not os.path.basename(x).startswith("save_"), x))
+
+# 테스트 코드: script_paths 내용 출력
+print("=== Collected Script Paths ===")
+for script in script_paths:
+    print(script)
+print("================================")
+
 # 입력값 정의
 input_values = [1, 2]
 # 주요 디렉토리 지정
@@ -60,4 +69,4 @@ base_directories = ["./_Dataset", "./pca_npyRes", "./auto_npyRes"]
 # 스크립트 실행 및 로그 저장
 execute_scripts(script_paths, input_values)
 # 스크립트 실행 이후 파일 크기 계산
-#calculate_folder_and_subfolder_sizes(base_directories)
+# calculate_folder_and_subfolder_sizes(base_directories)
