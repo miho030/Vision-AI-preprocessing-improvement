@@ -33,7 +33,7 @@ def get_dataset_paths():
     choice = sys.argv[1]
 
     if choice == "1":
-        train_path = os.path.abspath(os.path.join(cwd, "../_Dataset/cat_dog/training_set"))
+        train_path = os.path.abspath(os.path.join(cwd, "../../_Dataset/cat_dog/training_set"))
         test_path = os.path.abspath(os.path.join(cwd, "../_Dataset/cat_dog/test_set"))
     elif choice == "2":
         train_path = os.path.abspath(os.path.join(cwd, "../_Dataset/FER_2013/training_set"))
@@ -51,11 +51,11 @@ def get_dataset_paths():
 
     return train_path, test_path, choice
 
+
 # 함수 호출 및 결과 출력
 train_path, test_path, choice = get_dataset_paths()
 if train_path == None:
     exit(1)
-
 
 """ 시간 측정 시작 """
 auto_start_time = time.time()
@@ -123,18 +123,14 @@ autoencoder.fit(
 )
 
 # AutoEncoder 및 분류 모델 저장
-ae_path, model_path = None, None
 if choice == "1":
     ae_path = os.path.join(npyResDir, "fog_autoencoder_mobilenet_16x16_dogcat.h5")
+    encoder.save(ae_path)
 elif choice == "3":
     ae_path = os.path.join(npyResDir, "fog_autoencoder_mobilenet_16x16_FEB2013.h5")
-
-if ae_path == None or model_path == None:
-    print("autoEncoder and model path is nor correct!!")
-    exit(1)
-else:
     encoder.save(ae_path)
-    print("AutoEncoder saved.")
+print("AutoEncoder saved.")
+
 
 """ 시간 측정 종료 """
 auto_end_time = time.time()

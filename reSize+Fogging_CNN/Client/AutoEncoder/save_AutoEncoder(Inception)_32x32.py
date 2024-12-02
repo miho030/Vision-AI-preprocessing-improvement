@@ -123,23 +123,18 @@ autoencoder.fit(
 )
 
 # AutoEncoder 및 분류 모델 저장
-ae_path, model_path = None, None
 if choice == "1":
     ae_path = os.path.join(npyResDir, "fog_autoencoder_inception_32x32_dogcat.h5")
+    encoder.save(ae_path)
 elif choice == "3":
     ae_path = os.path.join(npyResDir, "fog_autoencoder_inception_32x32_FEB2013.h5")
-
-if ae_path == None or model_path == None:
-    print("autoEncoder and model path is nor correct!!")
-    exit(1)
-else:
     encoder.save(ae_path)
-    print("AutoEncoder saved.")
+print("AutoEncoder saved.")
+
 
 """ 시간 측정 종료 """
 auto_end_time = time.time()
 auto_total_time = auto_end_time - auto_start_time
-
 
 def size_npy_files(directory):
     print("=" * 60)
