@@ -1,21 +1,36 @@
-# Autoencoder + CNN (MobileNetV2) 32x32
-
 import os, sys, time
 import numpy as np
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.applications import MobileNetV2
+from tensorflow.keras.applications import InceptionV3
 from tensorflow.keras.models import Sequential, Model
 from tensorflow.keras.layers import Dense, Input, Flatten, Reshape, Dropout
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.callbacks import EarlyStopping
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+import tensorflow as tf
+
+class MemoryPrintingCallback(tf.keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs=None):
+      gpu_dict = tf.config.experimental.get_memory_info('GPU:0')
+      tf.print('\n GPU memory details [current: {} gb, peak: {} gb]'.format(
+          float(gpu_dict['current']) / (1024 ** 3),
+          float(gpu_dict['peak']) / (1024 ** 3)))
+
+gpus = tf.config.list_physical_devices('GPU')
+if gpus:
+    try:
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+    except RuntimeError as e:
+        print(e)
+
 
 # 현재 프로젝트의 경로 활용
 cwd = os.path.dirname(os.path.abspath(__file__))
 
 # 차원축소 데이터 저장 경로 지정
-npyResDir = "./auto_npyRes/auto_cnn_M_32/"
+npyResDir = "./auto_npyRes/auto_cnn_I_16/"
 os.makedirs(npyResDir, exist_ok=True)
 
 # 재귀함수 활용하여 결정된 데이터셋의 절대경로 및 용량을 구해 출력함.
@@ -58,14 +73,13 @@ train_path, test_path, choice = get_dataset_paths()
 if train_path == None:
     exit(1)
 
-
 """ AutoEncoder 시간 측정 시작 """
-auto_start_time = time.time()
+autoEncoder_start_time = time.time()
 
 # ImageDataGenerator 생성
 datagen = ImageDataGenerator(rescale=1.0 / 255.0)
 BATCH_SIZE = 32
-img_height, img_width = 224, 224  # MobileNet 입력 크기
+img_height, img_width = 224, 224
 
 # 훈련 데이터 로드
 training_set = datagen.flow_from_directory(
@@ -73,7 +87,7 @@ training_set = datagen.flow_from_directory(
     target_size=(img_height, img_width),
     batch_size=BATCH_SIZE,
     shuffle=False,
-    class_mode='categorical'
+    class_mode='categorical'  # 다중 클래스 분류
 )
 
 # 테스트 데이터 로드
@@ -82,22 +96,25 @@ test_set = datagen.flow_from_directory(
     target_size=(img_height, img_width),
     batch_size=BATCH_SIZE,
     shuffle=False,
-    class_mode='categorical'
+    class_mode='categorical'  # 다중 클래스 분류
 )
 
-# 전이학습 모델 불러오기 (MobileNetV2)
-mobilenet = MobileNetV2(weights='imagenet', include_top=False, input_shape=(img_height, img_width, 3))
+# 전이학습 모델 불러오기 (InceptionV3)
+inception = InceptionV3(weights='imagenet', include_top=False, input_shape=(img_height, img_width, 3))
 
 # 레이어 동결
-for layer in mobilenet.layers:
+for layer in inception.layers:
     layer.trainable = False
 
-# MobileNetV2로 특성 추출
-train_features = mobilenet.predict(training_set)
-test_features = mobilenet.predict(test_set)
+# InceptionV3로 특성 추출
+train_features = inception.predict(training_set)
+test_features = inception.predict(test_set)
+
+train_features = train_features.astype("float16")
+test_features = test_features.astype("float16")
 
 # Autoencoder 모델 구성
-encoded_dim = (32, 32)  # Autoencoder의 압축 크기
+encoded_dim = (16, 16)  # Autoencoder의 압축 크기
 input_dim = train_features.shape[1:]
 
 # Encoder
@@ -118,21 +135,21 @@ autoencoder.compile(optimizer=Adam(learning_rate=0.001), loss='mse')
 # Encoder 모델 분리
 encoder = Model(encoder_input, encoded_reshaped)
 
-# AutoEncoder 학습
+# Autoencoder 학습
 autoencoder.fit(
     train_features, train_features,
     validation_data=(test_features, test_features),
     epochs=50,
     batch_size=BATCH_SIZE,
     verbose=1,
-    callbacks=[EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)]
+    callbacks=[EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True), MemoryPrintingCallback()]
 )
 
 # Autoencoder로 차원 축소
 train_features_reduced = encoder.predict(train_features)
 test_features_reduced = encoder.predict(test_features)
 
-# Flatten for classification input
+# 1차원 벡터로 변환
 train_features_flat = train_features_reduced.reshape(train_features_reduced.shape[0], -1)
 test_features_flat = test_features_reduced.reshape(test_features_reduced.shape[0], -1)
 
@@ -142,11 +159,11 @@ test_labels = test_set.classes
 train_labels_cat = to_categorical(train_labels)
 test_labels_cat = to_categorical(test_labels)
 
-""" AutoEncoder 시간 측정 시작 """
-auto_end_time = time.time()
+""" AutoEncoder + 전처리 시간 측정 종료 시점 """
+autoEncoder_end_time = time.time()
 
 
-""" CNN 시간 측정 시작 """
+""" CNN 세팅, 학습 시간 측정 시작 시점"""
 cnn_start_time = time.time()
 
 # 분류 모델 구성
@@ -157,6 +174,7 @@ elif choice == "2":
     output = Dense(5, activation='softmax')  # 출력층
 elif choice == "3":
     output = Dense(3, activation='softmax')  # 출력층
+
 
 model = Sequential([
     Input(shape=(np.prod(encoded_dim),)),
@@ -170,7 +188,7 @@ model = Sequential([
 # 분류 모델 컴파일
 model.compile(
     optimizer=Adam(learning_rate=0.001),
-    loss='categorical_crossentropy',
+    loss='categorical_crossentropy',  # 다중 클래스 분류 손실 함수
     metrics=['accuracy']
 )
 
@@ -196,7 +214,7 @@ history = model.fit(
 cnn_end_time = time.time()
 
 # 시간 산정
-autoEncoder_total_time = auto_end_time - auto_start_time
+autoEncoder_total_time = autoEncoder_end_time - autoEncoder_start_time
 cnn_total_time = cnn_end_time - cnn_start_time
 total_time = autoEncoder_total_time + cnn_total_time
 
@@ -206,22 +224,23 @@ predicted_classes = np.argmax(predictions, axis=1)
 
 # 정확도, 정밀도, 재현율, F1 점수 계산
 accuracy = accuracy_score(test_labels, predicted_classes)
-precision = precision_score(test_labels, predicted_classes, average='micro')
-recall = recall_score(test_labels, predicted_classes, average='micro')
-f1 = f1_score(test_labels, predicted_classes, average='micro')
+precision = precision_score(test_labels, predicted_classes,  average='weighted')
+recall = recall_score(test_labels, predicted_classes, average='weighted')
+f1 = f1_score(test_labels, predicted_classes, average='weighted')
+
 
 
 # AutoEncoder 및 분류 모델 저장
 ae_path, model_path = None, None
 if choice == "1":
-    ae_path = os.path.join(npyResDir, "autoencoder_mobilenet_32x32_dogcat.h5")
-    model_path = os.path.join(npyResDir, "Classification_mobilenet_32x32_dogcat.h5")
+    ae_path = os.path.join(npyResDir, "autoencoder_inception_16x16_dogcat.h5")
+    model_path = os.path.join(npyResDir, "Classification_inception_16x16_dogcat.h5")
 elif choice == "2":
-    ae_path = os.path.join(npyResDir, "autoencoder_mobilenet_32x32_FEB2013.h5")
-    model_path = os.path.join(npyResDir, "Classification_mobilenet_32x32_FEB2013.h5")
+    ae_path = os.path.join(npyResDir, "autoencoder_inception_16x16_FEB2013.h5")
+    model_path = os.path.join(npyResDir, "Classification_inception_16x16_FEB2013.h5")
 
 if ae_path == None or model_path == None:
-    print("autoEncoder and model path is not correct!!")
+    print("autoEncoder and model path is nor correct!!")
     exit(1)
 else:
     autoencoder.save(ae_path)
@@ -261,7 +280,7 @@ measure_npy_file_sizes(npyResDir)
 # 결과 출력
 print("\n\n" + "=" * 60)
 print("--- Model result ---")
-print("* AutoEncoder + CNN / MobileNet / Size(32x32)")
+print("* AutoEncoder + CNN / InceptionV3 / Size(64x64)")
 print("="*60)
 print(f"- Accuracy: {accuracy:.4f}")
 print(f"- Precision: {precision:.4f}")

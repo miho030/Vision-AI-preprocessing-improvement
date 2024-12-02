@@ -1,4 +1,4 @@
-# Autoencoder + CNN (MobileNetV2) 32x32
+# Autoencoder + CNN (MobileNetV2) 64x64
 
 import os, sys, time
 import numpy as np
@@ -10,12 +10,28 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.callbacks import EarlyStopping
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+import tensorflow as tf
+
+class MemoryPrintingCallback(tf.keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs=None):
+      gpu_dict = tf.config.experimental.get_memory_info('GPU:0')
+      tf.print('\n GPU memory details [current: {} gb, peak: {} gb]'.format(
+          float(gpu_dict['current']) / (1024 ** 3),
+          float(gpu_dict['peak']) / (1024 ** 3)))
+
+gpus = tf.config.list_physical_devices('GPU')
+if gpus:
+    try:
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+    except RuntimeError as e:
+        print(e)
 
 # 현재 프로젝트의 경로 활용
 cwd = os.path.dirname(os.path.abspath(__file__))
 
 # 차원축소 데이터 저장 경로 지정
-npyResDir = "./auto_npyRes/auto_cnn_M_32/"
+npyResDir = "./auto_npyRes/auto_cnn_M_16/"
 os.makedirs(npyResDir, exist_ok=True)
 
 # 재귀함수 활용하여 결정된 데이터셋의 절대경로 및 용량을 구해 출력함.
@@ -96,8 +112,11 @@ for layer in mobilenet.layers:
 train_features = mobilenet.predict(training_set)
 test_features = mobilenet.predict(test_set)
 
+train_features = train_features.astype("float16")
+test_features = test_features.astype("float16")
+
 # Autoencoder 모델 구성
-encoded_dim = (32, 32)  # Autoencoder의 압축 크기
+encoded_dim = (16, 16)  # Autoencoder의 압축 크기
 input_dim = train_features.shape[1:]
 
 # Encoder
@@ -142,9 +161,8 @@ test_labels = test_set.classes
 train_labels_cat = to_categorical(train_labels)
 test_labels_cat = to_categorical(test_labels)
 
-""" AutoEncoder 시간 측정 시작 """
+""" AutoEncoder 시간 측정 종료 """
 auto_end_time = time.time()
-
 
 """ CNN 시간 측정 시작 """
 cnn_start_time = time.time()
@@ -204,24 +222,24 @@ total_time = autoEncoder_total_time + cnn_total_time
 predictions = model.predict(test_features_flat)
 predicted_classes = np.argmax(predictions, axis=1)
 
-# 정확도, 정밀도, 재현율, F1 점수 계산
+# 정확도, 정밀도, 재현율, F1 점수 계산 (다중 클래스 분류)
 accuracy = accuracy_score(test_labels, predicted_classes)
-precision = precision_score(test_labels, predicted_classes, average='micro')
-recall = recall_score(test_labels, predicted_classes, average='micro')
-f1 = f1_score(test_labels, predicted_classes, average='micro')
+precision = precision_score(test_labels, predicted_classes, average='weighted')
+recall = recall_score(test_labels, predicted_classes, average='weighted')
+f1 = f1_score(test_labels, predicted_classes, average='weighted')
 
 
 # AutoEncoder 및 분류 모델 저장
 ae_path, model_path = None, None
 if choice == "1":
-    ae_path = os.path.join(npyResDir, "autoencoder_mobilenet_32x32_dogcat.h5")
-    model_path = os.path.join(npyResDir, "Classification_mobilenet_32x32_dogcat.h5")
+    ae_path = os.path.join(npyResDir, "autoencoder_mobilenet_16x16_dogcat.h5")
+    model_path = os.path.join(npyResDir, "Classification_mobilenet_16x16_dogcat.h5")
 elif choice == "2":
-    ae_path = os.path.join(npyResDir, "autoencoder_mobilenet_32x32_FEB2013.h5")
-    model_path = os.path.join(npyResDir, "Classification_mobilenet_32x32_FEB2013.h5")
+    ae_path = os.path.join(npyResDir, "autoencoder_mobilenet_16x16_FEB2013.h5")
+    model_path = os.path.join(npyResDir, "Classification_mobilenet_16x16_FEB2013.h5")
 
 if ae_path == None or model_path == None:
-    print("autoEncoder and model path is not correct!!")
+    print("autoEncoder and model path is nor correct!!")
     exit(1)
 else:
     autoencoder.save(ae_path)
@@ -232,6 +250,7 @@ else:
 # Encoder를 사용하여 차원 축소
 train_features_reduced = encoder.predict(train_features)
 test_features_reduced = encoder.predict(test_features)
+
 
 # 차원 축소된 데이터 저장 및 용량 확인
 def measure_npy_file_sizes(directory):
@@ -261,7 +280,7 @@ measure_npy_file_sizes(npyResDir)
 # 결과 출력
 print("\n\n" + "=" * 60)
 print("--- Model result ---")
-print("* AutoEncoder + CNN / MobileNet / Size(32x32)")
+print("* AutoEncoder + CNN / MobileNet / Size(64x64)")
 print("="*60)
 print(f"- Accuracy: {accuracy:.4f}")
 print(f"- Precision: {precision:.4f}")
