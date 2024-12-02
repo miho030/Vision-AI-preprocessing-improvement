@@ -126,7 +126,7 @@ autoencoder.fit(
 if choice == "1":
     ae_path = os.path.join(npyResDir, "fog_autoencoder_mobilenet_16x16_dogcat.h5")
     encoder.save(ae_path)
-elif choice == "3":
+elif choice == "2":
     ae_path = os.path.join(npyResDir, "fog_autoencoder_mobilenet_16x16_FEB2013.h5")
     encoder.save(ae_path)
 print("AutoEncoder saved.")
