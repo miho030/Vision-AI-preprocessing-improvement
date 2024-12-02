@@ -35,10 +35,3 @@ def calculate_folder_and_subfolder_sizes(base_dirs):
 
             # 첫 레벨 폴더만 계산하고 하위 폴더로 들어가지 않음
             break
-
-
-# 주요 디렉토리 지정
-base_directories = ["./_Dataset", "./pca_npyRes", "./auto_npyRes"]
-
-# 폴더 크기 계산 및 출력
-calculate_folder_and_subfolder_sizes(base_directories)
