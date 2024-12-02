@@ -92,7 +92,7 @@ if choice == "1":
     encoder = load_model(npyResDir + "fog_autoencoder_mobilenet_32x32_dogcat.h5")
     train_features_reduced = encoder.predict(train_features)
     test_features_reduced = encoder.predict(test_features)
-elif choice == "3":
+elif choice == "2":
     encoder = load_model(npyResDir + "fog_autoencoder_mobilenet_32x32_FEB2013.h5")
     train_features_reduced = encoder.predict(train_features)
     test_features_reduced = encoder.predict(test_features)
