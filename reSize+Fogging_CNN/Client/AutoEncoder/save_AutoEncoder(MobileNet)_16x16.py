@@ -33,7 +33,7 @@ def get_dataset_paths():
     choice = sys.argv[1]
 
     if choice == "1":
-        train_path = os.path.abspath(os.path.join(cwd, "../../_Dataset/cat_dog/training_set"))
+        train_path = os.path.abspath(os.path.join(cwd, "../_Dataset/cat_dog/training_set"))
         test_path = os.path.abspath(os.path.join(cwd, "../_Dataset/cat_dog/test_set"))
     elif choice == "2":
         train_path = os.path.abspath(os.path.join(cwd, "../_Dataset/FER_2013/training_set"))
