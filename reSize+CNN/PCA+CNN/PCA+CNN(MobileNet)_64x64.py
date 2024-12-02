@@ -121,20 +121,14 @@ pca_end_time = time.time()
 """ CNN 시간 측정 시작 """
 cnn_start_time = time.time()
 
-if choice == "1":
-    output = Dense(2, activation='softmax')  # 출력층
-elif choice == "2":
-    output = Dense(5, activation='softmax')  # 출력층
-elif choice == "3":
-    output = Dense(3, activation='softmax')  # 출력층
-
+# 모델 구성
 model = Sequential([
     Input(shape=(n_components,)),
     Dense(128, activation='relu'),
     Dropout(0.5),
     Dense(64, activation='relu'),  # 추가 은닉층
     Dropout(0.5),
-    output
+    Dense(train_labels_cat.shape[1], activation='softmax')
 ])
 
 model.compile(

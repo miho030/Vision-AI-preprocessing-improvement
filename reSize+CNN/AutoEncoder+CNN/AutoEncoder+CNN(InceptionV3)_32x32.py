@@ -148,21 +148,13 @@ autoEncoder_end_time = time.time()
 """ CNN 세팅, 학습 시간 측정 시작 시점"""
 cnn_start_time = time.time()
 
-if choice == "1":
-    output = Dense(2, activation='softmax')  # 출력층
-elif choice == "2":
-    output = Dense(5, activation='softmax')  # 출력층
-elif choice == "3":
-    output = Dense(3, activation='softmax')  # 출력층
-
-# 분류 모델 구성
 model = Sequential([
     Input(shape=(np.prod(encoded_dim),)),
     Dense(128, activation='relu'),  # 은닉층
     Dropout(0.5),
     Dense(64, activation='relu'),  # 추가 은닉층
     Dropout(0.5),
-    output
+    Dense(train_labels_cat.shape[1], activation='softmax')
 ])
 
 # 분류 모델 컴파일

@@ -13,7 +13,7 @@ cwd = os.path.dirname(os.path.abspath(__file__))
 
 def get_dataset_paths():
     if len(sys.argv) != 2:
-        print("\n" + "Usage: python script_name.py <choice> (1, 2, or 3)")
+        print("\n" + "Usage: python script_name.py <choice> (1, 2)")
         return None, None, None
 
     choice = sys.argv[1]
@@ -22,13 +22,10 @@ def get_dataset_paths():
         train_path = os.path.abspath(os.path.join(cwd, "../_Dataset/cat_dog/training_set"))
         test_path = os.path.abspath(os.path.join(cwd, "../_Dataset/cat_dog/test_set"))
     elif choice == "2":
-        train_path = os.path.abspath(os.path.join(cwd, "../_Dataset/swimcat/training_set"))
-        test_path = os.path.abspath(os.path.join(cwd, "../_Dataset/swimcat/test_set"))
-    elif choice == "3":
         train_path = os.path.abspath(os.path.join(cwd, "../_Dataset/FER_2013/training_set"))
         test_path = os.path.abspath(os.path.join(cwd, "../_Dataset/FER_2013/test_set"))
     else:
-        print("Invalid choice. Please select 1, 2, or 3.")
+        print("Invalid choice. Please select 1, 2.")
         return None, None, None
 
     print("="*60)
@@ -80,8 +77,6 @@ for layer in mobilenet.layers:
 if choice == "1":
     output = Dense(2, activation='sigmoid')  # 출력층
 elif choice == "2":
-    output = Dense(5, activation='sigmoid')  # 출력층
-elif choice == "3":
     output = Dense(3, activation='sigmoid')  # 출력층
 
 # 분류 모델 구성

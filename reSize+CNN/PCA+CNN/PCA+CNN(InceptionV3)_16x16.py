@@ -123,20 +123,13 @@ cnn_start_time = time.time()
 
 # 분류 모델 구성
 
-if choice == "1":
-    output = Dense(2, activation='softmax')  # 출력층
-elif choice == "2":
-    output = Dense(5, activation='softmax')  # 출력층
-elif choice == "3":
-    output = Dense(3, activation='softmax')  # 출력층
-
 model = Sequential([
-    Input(shape=(n_components,)),  # PCA 결과를 입력으로 받음
-    Dense(128, activation='relu'),  # 은닉층
+    Input(shape=(n_components,)),
+    Dense(128, activation='relu'),
     Dropout(0.5),
     Dense(64, activation='relu'),  # 추가 은닉층
     Dropout(0.5),
-    output
+    Dense(train_labels_cat.shape[1], activation='softmax')
 ])
 
 # 모델 컴파일

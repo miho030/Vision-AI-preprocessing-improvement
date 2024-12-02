@@ -23,7 +23,7 @@ else:
 
 def get_dataset_paths():
     if len(sys.argv) != 2:
-        print("\n" + "Usage: python script_name.py <choice> (1, 2, or 3)")
+        print("\n" + "Usage: python script_name.py <choice> (1, 2)")
         return None, None, None
 
     choice = sys.argv[1]
@@ -32,13 +32,10 @@ def get_dataset_paths():
         train_path = os.path.abspath(os.path.join(cwd, "../_Dataset/cat_dog/training_set"))
         test_path = os.path.abspath(os.path.join(cwd, "../_Dataset/cat_dog/test_set"))
     elif choice == "2":
-        train_path = os.path.abspath(os.path.join(cwd, "../_Dataset/swimcat/training_set"))
-        test_path = os.path.abspath(os.path.join(cwd, "../_Dataset/swimcat/test_set"))
-    elif choice == "3":
         train_path = os.path.abspath(os.path.join(cwd, "../_Dataset/FER_2013/training_set"))
         test_path = os.path.abspath(os.path.join(cwd, "../_Dataset/FER_2013/test_set"))
     else:
-        print("Invalid choice. Please select 1, 2, or 3.")
+        print("Invalid choice. Please select 1, 2")
         return None, None, None
 
     print("="*60)
@@ -99,15 +96,6 @@ for layer in inception.layers:
             Dense(2, activation='sigmoid')  # 출력층
         ])
     elif choice == "2":
-        model = Sequential([
-            inception,  # InceptionV3 기반 특성 추출
-            GlobalAveragePooling2D(),  # 특성 맵을 1D 벡터로 변환
-            Dropout(0.5),  # 드롭아웃으로 과적합 방지
-            Dense(128, activation='relu'),  # 은닉층
-            Dense(64, activation='relu'),  # 추가 은닉층
-            Dense(5, activation='sigmoid')  # 출력층
-        ])
-    elif choice == "3":
         model = Sequential([
             inception,  # InceptionV3 기반 특성 추출
             GlobalAveragePooling2D(),  # 특성 맵을 1D 벡터로 변환
