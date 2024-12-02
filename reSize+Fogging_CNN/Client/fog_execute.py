@@ -1,17 +1,7 @@
 import os
 import subprocess
-import gc
-from numba import cuda
+#from fog1.calculate_folder_sizes import calculate_folder_and_subfolder_sizes
 
-from fog1.calculate_folder_sizes import calculate_folder_and_subfolder_sizes
-
-
-# GPU 메모리 해제 함수
-def clear_gpu_memory():
-    print("Clearing GPU memory...")
-    cuda.select_device(0)
-    cuda.close()
-    gc.collect()
 
 def execute_scripts(script_paths, input_values, log_dir="logs"):
     """
@@ -39,7 +29,6 @@ def execute_scripts(script_paths, input_values, log_dir="logs"):
                         stderr=log_file,  # 표준 에러도 로그 파일로 저장
                     )
                     print(f"Executed {script} with input {input_value}, log saved to {log_filepath}")
-                    clear_gpu_memory()
             except Exception as e:
                 print(f"Failed to execute {script} with input {input_value}: {e}")
 
@@ -71,4 +60,4 @@ base_directories = ["./_Dataset", "./pca_npyRes", "./auto_npyRes"]
 # 스크립트 실행 및 로그 저장
 execute_scripts(script_paths, input_values)
 # 스크립트 실행 이후 파일 크기 계산
-calculate_folder_and_subfolder_sizes(base_directories)
+#calculate_folder_and_subfolder_sizes(base_directories)
