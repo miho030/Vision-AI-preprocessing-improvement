@@ -199,7 +199,7 @@ history = model.fit(
 cnn_end_time = time.time()
 
 # 시간 산정
-autoEncoder_total_time = auto_end_time - auto_end_time
+autoEncoder_total_time = auto_end_time - auto_start_time
 cnn_total_time = cnn_end_time - cnn_start_time
 total_time = autoEncoder_total_time + cnn_total_time
 
