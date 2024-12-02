@@ -1,16 +1,19 @@
-# Load AutoEncoder
+# AutoEncoder training and save
 
 import os, sys, time
 import numpy as np
-from tensorflow.keras.models import load_model
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense, Flatten, Reshape, Input
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications import MobileNetV2
 
-# 현재 프로젝트의 경로 활용
+# 데이터 경로
 cwd = os.path.dirname(os.path.abspath(__file__))
 
 # 차원축소 데이터 저장 경로 지정
-npyResDir = "./auto_npyRes/fog_auto_M_32/"
+npyResDir = "./auto_npyRes/auto_cnn_M_16/"
 os.makedirs(npyResDir, exist_ok=True)
 
 # 재귀함수 활용하여 결정된 데이터셋의 절대경로 및 용량을 구해 출력함.
@@ -56,8 +59,9 @@ train_path, test_path, choice = get_dataset_paths()
 if train_path == None:
     exit(1)
 
-""" AutoEncoder 시간 측정 시작 """
-fog_auto_start_time = time.time()
+
+""" 시간 측정 시작 """
+auto_start_time = time.time()
 
 # ImageDataGenerator 생성
 datagen = ImageDataGenerator(rescale=1.0 / 255.0)
@@ -70,7 +74,7 @@ training_set = datagen.flow_from_directory(
     target_size=(img_height, img_width),
     batch_size=BATCH_SIZE,
     shuffle=False,
-    class_mode='categorical'
+    class_mode='binary'
 )
 
 test_set = datagen.flow_from_directory(
@@ -78,7 +82,7 @@ test_set = datagen.flow_from_directory(
     target_size=(img_height, img_width),
     batch_size=BATCH_SIZE,
     shuffle=False,
-    class_mode='categorical'
+    class_mode='binary'
 )
 
 # MobileNetV2를 이용한 특성 추출
@@ -89,29 +93,59 @@ for layer in mobilenet.layers:
 train_features = mobilenet.predict(training_set)
 test_features = mobilenet.predict(test_set)
 
-# 저장된 Encoder 불러오기
-# Encoder를 사용하여 차원 축소
+# AutoEncoder 모델 구성
+encoded_dim = (16, 16)
+input_dim = train_features.shape[1:]
+
+# Encoder
+encoder_input = Input(shape=input_dim)
+x = Flatten()(encoder_input)
+encoded = Dense(np.prod(encoded_dim), activation='relu')(x)
+encoded_reshaped = Reshape(encoded_dim)(encoded)
+
+# Decoder
+decoder_flat = Flatten()(encoded_reshaped)
+decoder_output = Dense(np.prod(input_dim), activation='relu')(decoder_flat)
+decoder_output_reshaped = Reshape(input_dim)(decoder_output)
+
+# AutoEncoder
+autoencoder = Model(encoder_input, decoder_output_reshaped)
+autoencoder.compile(optimizer=Adam(learning_rate=0.001), loss='mse')
+
+# Encoder 분리
+encoder = Model(encoder_input, encoded_reshaped)
+
+# AutoEncoder 학습
+autoencoder.fit(
+    train_features, train_features,
+    validation_data=(test_features, test_features),
+    epochs=50,
+    batch_size=BATCH_SIZE,
+    callbacks=[EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)],
+    verbose=1
+)
+
+# AutoEncoder 및 분류 모델 저장
+ae_path, model_path = None, None
 if choice == "1":
-    encoder = load_model(npyResDir + "fog_autoencoder_mobilenet_32x32_dogcat.h5")
-    train_features_reduced = encoder.predict(train_features)
-    test_features_reduced = encoder.predict(test_features)
+    ae_path = os.path.join(npyResDir, "fog_autoencoder_mobilenet_16x16_dogcat.h5")
 elif choice == "3":
-    encoder = load_model(npyResDir + "fog_autoencoder_mobilenet_32x32_FEB2013.h5")
-    train_features_reduced = encoder.predict(train_features)
-    test_features_reduced = encoder.predict(test_features)
-print("Encoder model Loaded.")
+    ae_path = os.path.join(npyResDir, "fog_autoencoder_mobilenet_16x16_FEB2013.h5")
 
-def measure_npy_file_sizes(directory):
-    # 차원 축소된 데이터 저장
-    print("\n\n" + "=" * 60)
-    print(f"--- reSized demention files ---")
-    np.save(npyResDir + "train_features_pca.npy", train_features_reduced)
-    np.save(npyResDir + "test_features_pca.npy", test_features_reduced)
-    np.save(npyResDir + "train_labels.npy", training_set.classes)
-    np.save(npyResDir + "test_labels.npy", test_set.classes)
-    print(f" -> PCA data saved at {npyResDir}\n" + "="*60)
-    print(f"--- File sizes in {directory} ---\n")
+if ae_path == None or model_path == None:
+    print("autoEncoder and model path is nor correct!!")
+    exit(1)
+else:
+    encoder.save(ae_path)
+    print("AutoEncoder saved.")
 
+""" 시간 측정 종료 """
+auto_end_time = time.time()
+auto_total_time = auto_end_time - auto_start_time
+
+
+def size_npy_files(directory):
+    print("=" * 60)
     total_size = 0
     # 디렉토리의 모든 파일 확인
     for file_name in os.listdir(directory):
@@ -122,17 +156,14 @@ def measure_npy_file_sizes(directory):
             total_size += file_size
 
     # 총 용량 출력
-    print(f"\nTotal size of all files: {total_size / (1024 ** 2):.2f} MB\n" + "="*60 + "\n")
-# npyResDir 내 파일 용량 측정 함수 호출
-measure_npy_file_sizes(npyResDir)
+    print(f"\nTotal size of all files: {total_size / (1024 ** 2):.2f} MB\n" + "="*60)
 
-""" Fogging+AutoEncoder 시간 측정 종료 """
-fog_auto_end_time = time.time()
-fog_auto_total_time = fog_auto_end_time - fog_auto_start_time
+
+# npyResDir 내 파일 용량 측정 함수 호출
+size_npy_files(npyResDir)
 
 # 시간 산정
-fog_pca_total_time = fog_auto_end_time - fog_auto_start_time
 print("\n\n" + "=" * 60)
-print("--- Fogging + AutoEncoder TimeSet ---")
-print(f"* Total execute time : {fog_auto_total_time:.3f} seconds.")
+print("--- Fogging + AutoEncoder (save) TimeSet ---")
+print(f" * Total execute time : {auto_total_time:.3f} seconds.")
 print("="*60)

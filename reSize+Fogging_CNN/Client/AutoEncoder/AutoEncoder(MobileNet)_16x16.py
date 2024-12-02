@@ -86,7 +86,7 @@ train_features = mobilenet.predict(training_set)
 test_features = mobilenet.predict(test_set)
 
 # AutoEncoder 모델 정의
-encoded_dim = (32, 32)  # AutoEncoder의 압축 차원
+encoded_dim = (16, 16)  # AutoEncoder의 압축 차원
 input_dim = train_features.shape[1:]  # MobileNetV2의 출력 크기
 
 # Encoder

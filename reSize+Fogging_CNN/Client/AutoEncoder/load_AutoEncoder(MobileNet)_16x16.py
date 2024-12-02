@@ -10,7 +10,7 @@ from tensorflow.keras.applications import MobileNetV2
 cwd = os.path.dirname(os.path.abspath(__file__))
 
 # 차원축소 데이터 저장 경로 지정
-npyResDir = "./auto_npyRes/fog_auto_M_32/"
+npyResDir = "./auto_npyRes/fog_auto_M_16/"
 os.makedirs(npyResDir, exist_ok=True)
 
 # 재귀함수 활용하여 결정된 데이터셋의 절대경로 및 용량을 구해 출력함.
@@ -92,11 +92,11 @@ test_features = mobilenet.predict(test_set)
 # 저장된 Encoder 불러오기
 # Encoder를 사용하여 차원 축소
 if choice == "1":
-    encoder = load_model(npyResDir + "fog_autoencoder_mobilenet_32x32_dogcat.h5")
+    encoder = load_model(npyResDir + "fog_autoencoder_mobilenet_16x16_dogcat.h5")
     train_features_reduced = encoder.predict(train_features)
     test_features_reduced = encoder.predict(test_features)
 elif choice == "3":
-    encoder = load_model(npyResDir + "fog_autoencoder_mobilenet_32x32_FEB2013.h5")
+    encoder = load_model(npyResDir + "fog_autoencoder_mobilenet_16x16_FEB2013.h5")
     train_features_reduced = encoder.predict(train_features)
     test_features_reduced = encoder.predict(test_features)
 print("Encoder model Loaded.")
