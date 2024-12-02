@@ -10,7 +10,7 @@ from tensorflow.keras.applications import MobileNetV2
 cwd = os.path.dirname(os.path.abspath(__file__))
 
 # 차원축소 데이터 저장 경로 지정
-npyResDir = "./pca_npyRes/fog_pca_M_32/"
+npyResDir = "./pca_npyRes/fog_pca_M_16/"
 os.makedirs(npyResDir, exist_ok=True)
 
 # 재귀함수 활용하여 결정된 데이터셋의 절대경로 및 용량을 구해 출력함.
@@ -101,7 +101,7 @@ test_features_flat = test_features.reshape(test_features.shape[0], -1)
 print(train_features_flat, test_features_flat)
 
 # PCA 적용 (32x32로 축소)
-n_components = 32 * 32
+n_components = 16 * 16
 pca = PCA(n_components=n_components)
 train_features_pca = pca.fit_transform(train_features_flat)
 test_features_pca = pca.transform(test_features_flat)
