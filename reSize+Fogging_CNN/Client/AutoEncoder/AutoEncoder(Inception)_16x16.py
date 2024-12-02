@@ -12,7 +12,20 @@ from tensorflow.keras.callbacks import EarlyStopping
 # 현재 프로젝트의 경로 활용
 cwd = os.path.dirname(os.path.abspath(__file__))
 
+# 차원축소 데이터 저장 경로 지정
+npyResDir = "./auto_npyRes/fog_auto_I_16/"
+os.makedirs(npyResDir, exist_ok=True)
+
+# 재귀함수 활용하여 결정된 데이터셋의 절대경로 및 용량을 구해 출력함.
 def get_dataset_paths():
+    def get_folder_size(path):
+        total_size = 0
+        for dirpath, dirnames, filenames in os.walk(path):
+            for file in filenames:
+                filepath = os.path.join(dirpath, file)
+                total_size += os.path.getsize(filepath) # 파일 크기를 누적
+        return total_size
+
     if len(sys.argv) != 2:
         print("\n" + "Usage: python script_name.py <choice> (1, 2, or 3)")
         return None, None, None
@@ -20,23 +33,21 @@ def get_dataset_paths():
     choice = sys.argv[1]
 
     if choice == "1":
-        train_path = os.path.abspath(os.path.join(cwd, "../../../_Dataset/cat_dog/training_set"))
-        test_path = os.path.abspath(os.path.join(cwd, "../../../_Dataset/cat_dog/test_set"))
+        train_path = os.path.abspath(os.path.join(cwd, "../_Dataset/cat_dog/training_set"))
+        test_path = os.path.abspath(os.path.join(cwd, "../_Dataset/cat_dog/test_set"))
     elif choice == "2":
-        train_path = os.path.abspath(os.path.join(cwd, "../../../_Dataset/swimcat/training_set"))
-        test_path = os.path.abspath(os.path.join(cwd, "../../../_Dataset/swimcat/test_set"))
-    elif choice == "3":
-        train_path = os.path.abspath(os.path.join(cwd, "../../../_Dataset/FER_2013/training_set"))
-        test_path = os.path.abspath(os.path.join(cwd, "../../../_Dataset/FER_2013/test_set"))
+        train_path = os.path.abspath(os.path.join(cwd, "../_Dataset/FER_2013/training_set"))
+        test_path = os.path.abspath(os.path.join(cwd, "../_Dataset/FER_2013/test_set"))
     else:
-        print("Invalid choice. Please select 1, 2, or 3.")
+        print("Invalid choice. Please select 1, 2.")
         return None, None, None
 
-    print("="*60)
-    print("--- DataSet selection ---")
+    print("\n\n" + "=" * 60)
+    print("--- DataSet Selection ---")
     print(f"Training Path: {train_path}")
     print(f"Testing Path: {test_path}")
-    print("="*60)
+    training_folder_size = get_folder_size(train_path) # 폴더 용량 계산
+    print(f"Training folder size: {training_folder_size / (1024**2):.2f} MB\n" + "="*60 + "\n")
 
     return train_path, test_path, choice
 
@@ -45,8 +56,6 @@ train_path, test_path, choice = get_dataset_paths()
 if train_path == None:
     exit(1)
 
-npyResDir = "./auto_I_npyRes/"
-os.makedirs(npyResDir, exist_ok=True)
 
 """ 시간 측정 시작 """
 auto_start_time = time.time()
@@ -134,7 +143,7 @@ auto_end_time = time.time()
 auto_total_time = auto_end_time - auto_start_time
 
 print("\n\n", "=" * 40)
-print("--- AutoEncoder TimeSet ---")
+print("--- Fogging + (load)AutoEncoder (InceptionV3) | Size(16x16) TimeSet ---")
 print(f"* Total execute time : {auto_total_time:.3f} seconds.")
 print("="*40)
 
