@@ -24,7 +24,7 @@ def get_dataset_paths():
         return total_size
 
     if len(sys.argv) != 2:
-        print("\n" + "Usage: python script_name.py <choice> (1, 2, or 3)")
+        print("\n" + "Usage: python script_name.py <choice> (1, 2)")
         return None, None, None
 
     choice = sys.argv[1]
@@ -33,13 +33,10 @@ def get_dataset_paths():
         train_path = os.path.abspath(os.path.join(cwd, "../_Dataset/cat_dog/training_set"))
         test_path = os.path.abspath(os.path.join(cwd, "../_Dataset/cat_dog/test_set"))
     elif choice == "2":
-        train_path = os.path.abspath(os.path.join(cwd, "../_Dataset/swimcat/training_set"))
-        test_path = os.path.abspath(os.path.join(cwd, "../_Dataset/swimcat/test_set"))
-    elif choice == "3":
         train_path = os.path.abspath(os.path.join(cwd, "../_Dataset/FER_2013/training_set"))
         test_path = os.path.abspath(os.path.join(cwd, "../_Dataset/FER_2013/test_set"))
     else:
-        print("Invalid choice. Please select 1, 2, or 3.")
+        print("Invalid choice. Please select 1, 2.")
         return None, None, None
 
     print("\n\n" + "=" * 60)
@@ -137,6 +134,6 @@ fog_pca_end_time = time.time()
 # 시간 산정
 fog_pca_total_time = fog_pca_end_time - fog_pca_start_time
 print("\n\n" + "=" * 60)
-print("--- Fogging + PCA TimeSet ---")
+print("--- Fogging + PCA (InceptionV3) | Size(16x16) TimeSet ---")
 print(f"Total execute time : {fog_pca_total_time:.3f} seconds.")
 print("="*60)
