@@ -1,4 +1,5 @@
-# PCA + CNN (MobileNetV2) 32x32
+# PCA + CNN (MobileNetV2) 64x64
+# -*- coding: utf-8 -*-
 
 import os, sys, time
 import numpy as np
@@ -16,10 +17,14 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 cwd = os.path.dirname(os.path.abspath(__file__))
 
 # 차원축소 데이터 저장 경로 지정
-npyResDir = "./pca_npyRes/pca_cnn_M_32/"
+npyResDir = "./pca_npyRes/pca_cnn_M_16/"
 os.makedirs(npyResDir, exist_ok=True)
 
-# 재귀함수 활용하여 결정된 데이터셋의 절대경로 및 용량을 구해 출력함.
+"""
+사용할 데이터셋 경로 및 폴더의 용량을 구하는 부분
+재귀함수를 사용하여 결정된 training_path 의 폴더 용량을 측정하여 사용하기로 결정된 데이터셋의
+절대경로와 해당 경로의 디렉터리 용량을 측정하여 시각화함.
+"""
 def get_dataset_paths():
     def get_folder_size(path):
         total_size = 0
@@ -60,6 +65,7 @@ train_path, test_path, choice = get_dataset_paths()
 if train_path == None:
     exit(1)
 
+
 """ PCA, 전처리 시간 측정 시작 """
 pca_start_time = time.time()
 
@@ -95,7 +101,7 @@ n_samples, h, w, c = train_features.shape
 train_features_flat = train_features.reshape(n_samples, -1)
 test_features_flat = test_features.reshape(test_features.shape[0], -1)
 
-n_components = 32 * 32
+n_components = 16 * 16
 pca = PCA(n_components=n_components)
 train_features_pca = pca.fit_transform(train_features_flat)
 test_features_pca = pca.transform(test_features_flat)
@@ -149,6 +155,7 @@ history = model.fit(
     callbacks=[early_stopping],
     verbose=1
 )
+
 """ CNN 세팅, 학습 시간 측정 종료 시점 """
 cnn_end_time = time.time()
 
@@ -170,12 +177,13 @@ f1 = f1_score(test_labels, predicted_classes, average='micro')
 
 # 학습된 가중치 모델 저장
 if choice == "1":
-    model_path = os.path.join(npyResDir, "classification_mobilenet_32x32_dogcat.h5")
+    model_path = os.path.join(npyResDir, "classification_mobilenet_64x64_dogcat.h5")
     model.save(model_path)
 elif choice == "2":
-    model_path = os.path.join(npyResDir, "classification_mobilenet_32x32_FEB2013.h5")
+    model_path = os.path.join(npyResDir, "classification_mobilenet_64x64_FEB2013.h5")
     model.save(model_path)
 print("h5 Model saved.")
+
 
 # 차원 축소된 데이터 저장 및 용량 확인
 def measure_npy_file_sizes(directory):
@@ -205,7 +213,7 @@ measure_npy_file_sizes(npyResDir)
 # 결과 출력
 print("\n\n" + "=" * 60)
 print("--- Model result ---")
-print("* PCA + CNN / MobileNet / Size(32x32)")
+print("* PCA + CNN / MobileNet / Size(16x16)")
 print("="*60)
 print(f"- Accuracy: {accuracy:.4f}")
 print(f"- Precision: {precision:.4f}")

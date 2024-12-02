@@ -38,13 +38,10 @@ def get_dataset_paths():
         train_path = os.path.abspath(os.path.join(cwd, "../../_Dataset/cat_dog/training_set"))
         test_path = os.path.abspath(os.path.join(cwd, "../../_Dataset/cat_dog/test_set"))
     elif choice == "2":
-        train_path = os.path.abspath(os.path.join(cwd, "../../_Dataset/swimcat/training_set"))
-        test_path = os.path.abspath(os.path.join(cwd, "../../_Dataset/swimcat/test_set"))
-    elif choice == "3":
         train_path = os.path.abspath(os.path.join(cwd, "../../_Dataset/FER_2013/training_set"))
         test_path = os.path.abspath(os.path.join(cwd, "../../_Dataset/FER_2013/test_set"))
     else:
-        print("Invalid choice. Please select 1, 2, or 3.")
+        print("Invalid choice. Please select 1, 2.")
         return None, None, None
 
     print("\n\n" + "=" * 60)
