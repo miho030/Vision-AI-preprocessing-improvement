@@ -21,7 +21,7 @@ def execute_scripts(script_paths, input_values, log_dir="logs"):
                 with open(log_filepath, "w") as log_file:
                     # subprocess로 스크립트 실행 (입력값을 명령줄 인수로 전달)
                     process = subprocess.run(
-                        ["python", script, str(input_value)],  # 'python script_path input_value'
+                        ["python3", script, str(input_value)],  # 'python script_path input_value'
                         text=True,
                         stdout=log_file,  # 표준 출력을 로그 파일로 저장
                         stderr=log_file,  # 표준 에러도 로그 파일로 저장
@@ -52,10 +52,17 @@ for root, dirs, files in os.walk(pca_folder):
 
 # 입력값 정의
 input_values = [1, 2]
+
+# 스크립트 정렬: save_ → load_ → 기타
+save_scripts = [script for script in script_paths if os.path.basename(script).startswith("save_")]
+load_scripts = [script for script in script_paths if os.path.basename(script).startswith("load_")]
+other_scripts = [script for script in script_paths if not (os.path.basename(script).startswith("save_") or os.path.basename(script).startswith("load_"))]
+
+# 정렬된 순서로 실행
+sorted_script_paths = save_scripts + load_scripts + other_scripts
+
 # 주요 디렉토리 지정
 base_directories = ["./_Dataset", "./pca_npyRes", "./auto_npyRes"]
 
 # 스크립트 실행 및 로그 저장
-execute_scripts(script_paths, input_values)
-# 스크립트 실행 이후 파일 크기 계산
-# calculate_folder_and_subfolder_sizes(base_directories)
+execute_scripts(sorted_script_paths, input_values)
