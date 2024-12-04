@@ -45,7 +45,7 @@ def get_dataset_paths():
         return total_size
 
     if len(sys.argv) != 2:
-        print("\n" + "Usage: python script_name.py <choice> (1, 2, or 3)")
+        print("\n" + "Usage: python script_name.py <choice> (1, 2)")
         return None, None, None
 
     choice = sys.argv[1]
@@ -225,11 +225,11 @@ f1 = f1_score(test_labels, predicted_classes, average='weighted')
 # AutoEncoder 및 분류 모델 저장
 ae_path, model_path = None, None
 if choice == "1":
-    ae_path = os.path.join(npyResDir, "autoencoder_mobilenet_16x16_dogcat.h5")
-    model_path = os.path.join(npyResDir, "Classification_mobilenet_16x16_dogcat.h5")
+    ae_path = os.path.join(npyResDir, "autoencoder_mobilenet_22x22_dogcat.h5")
+    model_path = os.path.join(npyResDir, "Classification_mobilenet_22x22_dogcat.h5")
 elif choice == "2":
-    ae_path = os.path.join(npyResDir, "autoencoder_mobilenet_16x16_FEB2013.h5")
-    model_path = os.path.join(npyResDir, "Classification_mobilenet_16x16_FEB2013.h5")
+    ae_path = os.path.join(npyResDir, "autoencoder_mobilenet_22x22_FEB2013.h5")
+    model_path = os.path.join(npyResDir, "Classification_mobilenet_22x22_FEB2013.h5")
 
 if ae_path == None or model_path == None:
     print("autoEncoder and model path is nor correct!!")
@@ -273,7 +273,7 @@ measure_npy_file_sizes(npyResDir)
 # 결과 출력
 print("\n\n" + "=" * 60)
 print("--- Model result ---")
-print("* AutoEncoder + CNN / MobileNet / Size(64x64)")
+print("* AutoEncoder + CNN / MobileNet / Size(22x22)")
 print("="*60)
 print(f"- Accuracy: {accuracy:.4f}")
 print(f"- Precision: {precision:.4f}")
