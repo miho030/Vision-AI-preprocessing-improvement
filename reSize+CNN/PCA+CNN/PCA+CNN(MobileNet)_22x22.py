@@ -207,7 +207,7 @@ measure_npy_file_sizes(npyResDir)
 # 결과 출력
 print("\n\n" + "=" * 60)
 print("--- Model result ---")
-print("* PCA + CNN / MobileNet / Size(16x16)")
+print("* PCA + CNN / MobileNet / Size(32x32)")
 print("="*60)
 print(f"- Accuracy: {accuracy:.4f}")
 print(f"- Precision: {precision:.4f}")

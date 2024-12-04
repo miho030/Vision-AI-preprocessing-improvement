@@ -32,7 +32,7 @@ def get_dataset_paths():
         return total_size
 
     if len(sys.argv) != 2:
-        print("\n" + "Usage: python script_name.py <choice> (1, 2, or 3)")
+        print("\n" + "Usage: python script_name.py <choice> (1, 2)")
         return None, None, None
 
     choice = sys.argv[1]
@@ -179,10 +179,10 @@ f1 = f1_score(test_labels, predicted_classes, average='weighted')
 
 # 학습된 가중치 모델 저장
 if choice == "1":
-    model_path = os.path.join(npyResDir, "classification_inceptiont_16x16_dogcat.h5")
+    model_path = os.path.join(npyResDir, "classification_inceptiont_32x32_dogcat.h5")
     model.save(model_path)
 elif choice == "2":
-    model_path = os.path.join(npyResDir, "classification_inceptiont_16x16_FEB2013.h5")
+    model_path = os.path.join(npyResDir, "classification_inceptiont_32x32_FEB2013.h5")
     model.save(model_path)
 print("h5 Model saved.")
 
@@ -213,7 +213,7 @@ measure_npy_file_sizes(npyResDir)
 # 결과 출력
 print("\n\n" + "=" * 60)
 print("--- Model result ---")
-print("* PCA + CNN / MobileNet / Size(16x16)")
+print("* PCA + CNN / MobileNet / Size(32x32)")
 print("="*60)
 print(f"- Accuracy: {accuracy:.4f}")
 print(f"- Precision: {precision:.4f}")
